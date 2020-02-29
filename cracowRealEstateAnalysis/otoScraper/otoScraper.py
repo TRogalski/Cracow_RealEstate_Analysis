@@ -35,6 +35,14 @@ class OtoScraper:
             links.append(offer['data-url'])
         return links
     
+    def get_data_from_offer_links(self, offerLinks):
+        for link in offerLinks:
+            response = requests.get(link)
+            html_soup = BeautifulSoup(response.content, 'html.parser')
+            print(html_soup)
+            
+    
 if __name__ == "__main__":
     otoScraper = OtoScraper()
-    otoScraper.get_all_offer_links(4)
+    links = otoScraper.get_all_offer_links(4)
+    otoScraper.get_data_from_offer_links(links)
