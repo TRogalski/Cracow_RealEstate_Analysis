@@ -16,16 +16,13 @@ class OtoScraper:
             offerLinks += self.get_page_offer_links(response)
             pageId+=1
             response = requests.get(self.page_url_template.format(pageId))
-            
-        print(len(offerLinks))
-        print(len(set(offerLinks)))
+        return offerLinks
     
     
     def get_page_offer_links(self, httpResponse):
         html_soup = BeautifulSoup(httpResponse.content, 'html.parser')
         offerSections = html_soup.find_all(attrs={"data-url" : re.compile(r".*")})
         links = self.get_links_from_articles(offerSections)
-        print(links)
         return links 
         
     
@@ -35,12 +32,23 @@ class OtoScraper:
             links.append(offer['data-url'])
         return links
     
+    
     def get_data_from_offer_links(self, offerLinks):
+        offerData = {}
         for link in offerLinks:
             response = requests.get(link)
-            html_soup = BeautifulSoup(response.content, 'html.parser')
-            print(html_soup)
-            
+            htmlSoup = BeautifulSoup(response.content, 'html.parser')
+            offerDetailsSection = htmlSoup.find(class_ = "section-overview")
+            detailsList = offerDetailsSection.find_all('li')
+            offerData[link] = self.format_offer_details(detailsList)
+            print(offerData)
+    
+    def format_offer_details(self, detailsList):
+        formattedDetails = {}
+        for detail in detailsList:
+            k, v = detail.text.split(':')
+            formattedDetails[k] = v
+        return formattedDetails
     
 if __name__ == "__main__":
     otoScraper = OtoScraper()
